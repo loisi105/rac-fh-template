@@ -1,0 +1,14 @@
+\begin{table}[h]
+    \centering
+    \rowcolors{2}{rac-table-row}{white}
+    \begin{tabularx}{\textwidth}{|X|l|}
+        \hline
+        \rowcolor{rac-table-header} \textbf{Weitere anwesende Personen} \\ \hline
+        \csvreader[
+            separator=semicolon,
+            late after line=\\\hline
+        ]{./external-visitors.csv}{name=\name, organization=\org}{
+            \name\space\org
+        }
+    \end{tabularx}
+\end{table}

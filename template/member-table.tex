@@ -1,0 +1,14 @@
+\begin{table}[h]
+    \centering
+    \rowcolors{2}{rac-table-row}{white}
+    \begin{tabularx}{\textwidth}{|X|c|}
+        \hline
+        \rowcolor{rac-table-header} \textbf{Mitglied} & \textbf{Teilgenommen} \\ \hline
+        \csvreader[
+            separator=semicolon,
+            late after line=\\\hline
+        ]{./member-attandance.csv}{name=\name, attendance=\att}{
+            \name & \ifnum\att=1 $\boxtimes$ \else $\square$ \fi
+        }
+    \end{tabularx}
+\end{table}
