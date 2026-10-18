@@ -10,12 +10,12 @@ This setup was done on linux and uses a symlink for template referencing. That i
 
 * vscode
 * vscode plugin `LaTeX Workshop` from James Yu
-* TeX Live `sudo apt-get install texlive texlive-latex-extra ` on ubuntu
+* TeX Live `sudo apt-get install texlive texlive-latex-extra` on ubuntu
 
 ## Usage
 
-Write text as in the example [meeting.tex](./20260211/meeting.tex) file. Default LaTeX syntax can be used. 
+Write text as in the example [meeting.tex](./20260211/meeting.tex) file. Default LaTeX syntax can be used.
 
-# [Example](./20260211/build/meeting.pdf)
+## Example
 
-![Example](./20260211/build/meeting.pdf)
+![Example](./20260211/meeting.pdf)
