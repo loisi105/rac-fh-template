@@ -10,6 +10,8 @@
 \RequirePackage{titlesec}
 \RequirePackage{setspace}
 \RequirePackage[absolute,overlay]{textpos}
+\RequirePackage{etoolbox}
+\RequirePackage{tabularx}
 
 % global Variable definitions
 \newcommand{\mTitle}[1]{\def\@mTitle{#1}}
@@ -71,4 +73,24 @@
         \input{./template/external-visitors-table.tex}
     \end{titlepage}
     \pagenumbering{arabic}
+}
+
+% Usage: \todo{Who}{What}
+
+\newcommand*\@todorows{}
+
+\newcommand{\todo}[2]{%
+  \textbf{$\rightarrow$ #1:}~\emph{#2}%
+  \xappto\@todorows{%
+    \unexpanded{#1} & \unexpanded{#2} & \thesection
+    \noexpand\\ \noexpand\hline}%
+}
+
+\newcommand{\printtodos}{%
+  \section{ToDo}
+  \begin{tabularx}{\textwidth}{|l|X|c|}
+    \hline
+    \textbf{Wer} & \textbf{Was} & \textbf{Abschnitt} \\ \hline
+    \@todorows
+  \end{tabularx}%
 }
