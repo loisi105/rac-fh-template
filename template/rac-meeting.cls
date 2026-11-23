@@ -11,7 +11,7 @@
 \RequirePackage{setspace}
 \RequirePackage[absolute,overlay]{textpos}
 \RequirePackage{etoolbox}
-\RequirePackage{tabularx}
+\RequirePackage{xltabular}
 
 % global Variable definitions
 \newcommand{\mTitle}[1]{\def\@mTitle{#1}}
@@ -65,7 +65,6 @@
         \centering
         \makeatletter
         {\Huge \bfseries \color{rac-pink} \@mTitle} \\[0.4cm]
-        \makeatletter
 
         \input{./template/meeting-table.tex}
         \input{./template/member-table.tex}
@@ -75,22 +74,49 @@
     \pagenumbering{arabic}
 }
 
-% Usage: \todo{Who}{What}
+% Usage: \todo[deadline]{Who}{What}   (deadline is optional)
+% The "Bis wann" column is only printed if at least one todo has a deadline,
+% so every row is stored twice: with and without that column.
+% Requires hyperref (loaded in preamble.sty): the "Abschnitt" entry links to the todo itself.
 
 \newcommand*\@todorows{}
+\newcommand*\@todorowsdl{}
+\newtoggle{todohasdeadline}
+\newcounter{todoitem}
 
-\newcommand{\todo}[2]{%
-  \textbf{$\rightarrow$ #1:}~\emph{#2}%
+% Current position: subsection if inside one, else section
+\newcommand*\@todoloc{\ifnum\value{subsection}>0 \thesubsection\else\thesection\fi}
+
+\NewDocumentCommand{\todo}{o m m}{%
+  \stepcounter{todoitem}%
+  \hypertarget{todo.\thetodoitem}{\textbf{$\rightarrow$ #2:}}~\emph{#3}%
+  \IfValueT{#1}{\ (bis #1)\global\toggletrue{todohasdeadline}}%
   \xappto\@todorows{%
-    \unexpanded{#1} & \unexpanded{#2} & \thesection
+    \unexpanded{#2} & \unexpanded{#3} &
+    \noexpand\hyperlink{todo.\thetodoitem}{\@todoloc}
+    \noexpand\\ \noexpand\hline}%
+  \xappto\@todorowsdl{%
+    \unexpanded{#2} & \unexpanded{#3} &
+    \IfValueTF{#1}{\unexpanded{#1}}{--} &
+    \noexpand\hyperlink{todo.\thetodoitem}{\@todoloc}
     \noexpand\\ \noexpand\hline}%
 }
 
 \newcommand{\printtodos}{%
-  \section{ToDo}
-  \begin{tabularx}{\textwidth}{|l|X|c|}
-    \hline
-    \textbf{Wer} & \textbf{Was} & \textbf{Abschnitt} \\ \hline
-    \@todorows
-  \end{tabularx}%
+  \section*{ToDo}
+  \ifdefempty{\@todorows}
+    {\emph{Keine ToDos.}}
+    {\iftoggle{todohasdeadline}
+      {\begin{xltabular}{\textwidth}{|l|X|l|c|}
+        \hline
+        \textbf{Wer} & \textbf{Was} & \textbf{Bis wann} & \textbf{Abschnitt} \\ \hline
+        \endhead
+        \@todorowsdl
+      \end{xltabular}}
+      {\begin{xltabular}{\textwidth}{|l|X|c|}
+        \hline
+        \textbf{Wer} & \textbf{Was} & \textbf{Abschnitt} \\ \hline
+        \endhead
+        \@todorows
+      \end{xltabular}}}%
 }
