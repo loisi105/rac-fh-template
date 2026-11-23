@@ -1,10 +1,6 @@
-\begin{table}[h]
-    \centering
-    \begin{tabularx}{\textwidth}{|l|l|l|X|}
-        \hline
-        \makeatletter
-        \cellcolor{rac-table-header}\textbf{Datum} & \@mDate \hspace{1cm} & \cellcolor{rac-table-header}\textbf{Ort}  & \@mLocation \\\hline
-        \cellcolor{rac-table-header}\textbf{Start} & \@mStart             & \cellcolor{rac-table-header}\textbf{Ende} & \@mEnd
-        \makeatletter                                                                                                               \\\hline
-    \end{tabularx}
-\end{table}
+\centering
+\begin{tabularx}{\textwidth}{|l|l|l|X|}
+    \hline
+    \cellcolor{rac-table-header}\textbf{Datum} & \racMeetingDate\hspace{1cm} & \cellcolor{rac-table-header}\textbf{Ort}  & \racMeetingLocation \\\hline
+    \cellcolor{rac-table-header}\textbf{Start} & \racMeetingStart            & \cellcolor{rac-table-header}\textbf{Ende} & \racMeetingEnd      \\\hline
+\end{tabularx}

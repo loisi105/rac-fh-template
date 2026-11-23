@@ -3,6 +3,12 @@
 
 \LoadClass[11pt, a4paper]{article}
 
+% Directory of the template files (logo, table snippets).
+% Override before \documentclass with \def\racdir{path} if needed.
+\providecommand*{\racdir}{template}
+
+\RequirePackage[ngerman]{babel}
+\RequirePackage[table]{xcolor}
 \RequirePackage[top=4cm, bottom=4cm, left=4cm, right=4cm, headsep=1cm]{geometry}
 \RequirePackage{fancyhdr}
 \RequirePackage{lastpage}
@@ -12,28 +18,59 @@
 \RequirePackage[absolute,overlay]{textpos}
 \RequirePackage{etoolbox}
 \RequirePackage{xltabular}
+\RequirePackage{tabularx}
+\RequirePackage{amssymb}
+\RequirePackage{csvsimple-l3}
+\RequirePackage{graphicx}
+\RequirePackage[ngerman]{datetime2}
+\RequirePackage[hidelinks]{hyperref}
 
-% global Variable definitions
-\newcommand{\mTitle}[1]{\def\@mTitle{#1}}
-\newcommand{\mDate}[1]{\def\@mDate{#1}}
-\newcommand{\mAuthor}[1]{\def\@mAuthor{#1}}
-\newcommand{\mLocation}[1]{\def\@mLocation{#1}}
-\newcommand{\mStart}[1]{\def\@mStart{#1}}
-\newcommand{\mEnd}[1]{\def\@mEnd{#1}}
+\definecolor{rac-table-row}{gray}{0.95}
+\definecolor{rac-table-header}{gray}{0.85}
+\definecolor{rac-pink}{HTML}{c10042}
 
-% Header and Footer layout
+% Translatable strings
+\newcommand*{\racAuthorLabel}{Autor}
+\newcommand*{\racPageLabel}{Seite}
+\newcommand*{\racNoTodos}{Keine ToDos.}
+
+\newcommand*{\racMeetingTitle}{}
+\newcommand*{\racMeetingAuthor}{}
+\newcommand*{\racMeetingLocation}{}
+\newcommand*{\racMeetingStart}{}
+\newcommand*{\racMeetingEnd}{}
+\DTMsavedate{racmeetingdate}{\the\year-\two@digits\month-\two@digits\day}
+\newcommand*{\racMeetingDate}{\DTMusedate{racmeetingdate}}
+
+\newcommand{\mTitle}[1]{\renewcommand*{\racMeetingTitle}{#1}}
+\newcommand{\mAuthor}[1]{\renewcommand*{\racMeetingAuthor}{#1}}
+\newcommand{\mLocation}[1]{\renewcommand*{\racMeetingLocation}{#1}}
+\newcommand{\mStart}[1]{\renewcommand*{\racMeetingStart}{#1}}
+\newcommand{\mEnd}[1]{\renewcommand*{\racMeetingEnd}{#1}}
+% Date in ISO format: \mDate{2026-01-20}, printed as 20.01.2026
+\newcommand{\mDate}[1]{\DTMsavedate{racmeetingdate}{#1}}
+
+% \racIfYes{value}{true}{false}: value is 1, x or ja (case-insensitive, spaces trimmed)
+\ExplSyntaxOn
+\NewDocumentCommand{\racIfYes}{m m m}
+  {
+    \str_case:enF { \str_lowercase:f { \tl_trim_spaces:n {#1} } }
+      { {1}{#2} {x}{#2} {ja}{#2} }
+      {#3}
+  }
+\ExplSyntaxOff
+
 \pagestyle{fancy}
 \fancyhf{}
 
-\fancyhead[L]{\@mTitle \ - \@mDate}
-\fancyhead[R]{  \adjustimage{width=0.4\linewidth, valign=m}{template/RAC_FH_Clublogo.png}}
-\fancyfoot[L]{Autor: \@mAuthor}
-\fancyfoot[R]{Seite \thepage/\pageref*{LastPage}}
+\fancyhead[L]{\racMeetingTitle\ - \racMeetingDate}
+\fancyhead[R]{  \adjustimage{width=0.4\linewidth, valign=m}{\racdir/RAC_FH_Clublogo.png}}
+\fancyfoot[L]{\racAuthorLabel: \racMeetingAuthor}
+\fancyfoot[R]{\racPageLabel{} \thepage/\pageref*{LastPage}}
 
 \setlength{\headheight}{50pt}
 \setlength{\footskip}{37pt}
 
-% Styling of headers
 
 \titleformat{\section}
 {\normalfont\Large\bfseries\color{rac-pink}}
@@ -53,38 +90,32 @@
 {1em}
 {}
 
-% Title page
 
 \newcommand{\makeRacTitle}{
-    \pagenumbering{Alph} % prevent duplicate page 1 even tough never output0
+    \pagenumbering{gobble}
     \begin{titlepage}
         \begin{textblock}{5}(7.5, 0.5)
-            \includegraphics[width=\linewidth]{./template/RAC_FH_Clublogo.png}
+            \includegraphics[width=\linewidth]{\racdir/RAC_FH_Clublogo.png}
         \end{textblock}
 
         \centering
-        \makeatletter
-        {\Huge \bfseries \color{rac-pink} \@mTitle} \\[0.4cm]
+        {\Huge \bfseries \color{rac-pink} \racMeetingTitle} \\[0.4cm]
 
-        \input{./template/meeting-table.tex}
-        \input{./template/member-table.tex}
+        \input{\racdir/meeting-table.tex}
+        \input{\racdir/member-table.tex}
         \vfill
-        \input{./template/external-visitors-table.tex}
+        \input{\racdir/external-visitors-table.tex}
     \end{titlepage}
     \pagenumbering{arabic}
 }
 
 % Usage: \todo[deadline]{Who}{What}   (deadline is optional)
-% The "Bis wann" column is only printed if at least one todo has a deadline,
-% so every row is stored twice: with and without that column.
-% Requires hyperref (loaded in preamble.sty): the "Abschnitt" entry links to the todo itself.
 
 \newcommand*\@todorows{}
 \newcommand*\@todorowsdl{}
 \newtoggle{todohasdeadline}
 \newcounter{todoitem}
 
-% Current position: subsection if inside one, else section
 \newcommand*\@todoloc{\ifnum\value{subsection}>0 \thesubsection\else\thesection\fi}
 
 \NewDocumentCommand{\todo}{o m m}{%
@@ -105,7 +136,7 @@
 \newcommand{\printtodos}{%
   \section*{ToDo}
   \ifdefempty{\@todorows}
-    {\emph{Keine ToDos.}}
+    {\emph{\racNoTodos}}
     {\iftoggle{todohasdeadline}
       {\begin{xltabular}{\textwidth}{|l|X|l|c|}
         \hline

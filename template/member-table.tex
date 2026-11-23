@@ -1,4 +1,4 @@
-\begin{table}[h]
+\IfFileExists{./member-attendance.csv}{%
     \centering
     \rowcolors{2}{rac-table-row}{white}
     \begin{tabularx}{\textwidth}{|X|c|}
@@ -7,8 +7,8 @@
         \csvreader[
             separator=semicolon,
             late after line=\\\hline
-        ]{./member-attandance.csv}{name=\name, attendance=\att}{
-            \name & \ifnum\att=1 $\boxtimes$ \else $\square$ \fi
+        ]{./member-attendance.csv}{name=\name, attendance=\att}{
+            \name & \racIfYes{\att}{$\boxtimes$}{$\square$}
         }
     \end{tabularx}
-\end{table}
+}{\ClassWarning{rac-meeting}{member-attendance.csv not found, member table skipped}}
